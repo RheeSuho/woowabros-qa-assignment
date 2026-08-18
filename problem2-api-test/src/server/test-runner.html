@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B마트 재고 API 테스트 러너</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 17px; color: #e6edf3; font-weight: 600; }
+    .tag { background: #1f3f6b; color: #58a6ff; border: 1px solid #1f3f6b; padding: 2px 10px; border-radius: 20px; font-size: 12px; }
+
+    main { max-width: 860px; margin: 0 auto; padding: 24px 20px; }
+
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+    select {
+      flex: 1; background: #161b22; color: #e6edf3; border: 1px solid #30363d;
+      padding: 9px 14px; border-radius: 8px; font-size: 14px; cursor: pointer;
+    }
+    select:focus { outline: none; border-color: #58a6ff; }
+    .btn {
+      background: #21262d; color: #c9d1d9; border: 1px solid #30363d;
+      padding: 9px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; white-space: nowrap;
+    }
+    .btn:hover { background: #30363d; }
+    .btn-green { background: #196c2e; color: #fff; border-color: #196c2e; }
+    .btn-green:hover { background: #238636; }
+
+    /* Summary */
+    .summary { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; display: none; }
+    .summary-title { color: #e6edf3; font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    .summary-nums { display: flex; gap: 12px; margin-bottom: 14px; }
+    .snum { background: #0d1117; border-radius: 8px; padding: 10px 16px; text-align: center; flex: 1; }
+    .snum .n { font-size: 22px; font-weight: 700; }
+    .snum .l { font-size: 11px; color: #8b949e; margin-top: 2px; }
+    .n-total { color: #58a6ff; } .n-pass { color: #3fb950; } .n-fail { color: #f85149; }
+    .mini-list { display: flex; flex-direction: column; gap: 5px; }
+    .mini { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 6px; font-size: 13px; }
+    .mini.pass { background: #1a4731; } .mini.fail { background: #4a1515; }
+    .mini-id { color: #8b949e; font-family: monospace; font-size: 11px; width: 48px; }
+    .mini-name { flex: 1; }
+    .mini-status { font-size: 12px; }
+
+    /* Result card */
+    .result-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; overflow: hidden; }
+    .card-head { padding: 14px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #21262d; }
+    .card-id { color: #8b949e; font-size: 12px; font-family: monospace; }
+    .card-name { color: #e6edf3; font-size: 15px; font-weight: 600; flex: 1; }
+    .card-desc { padding: 10px 18px; color: #8b949e; font-size: 13px; border-bottom: 1px solid #21262d; }
+
+    .badge-pass { background: #196c2e; color: #3fb950; border: 1px solid #238636; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-fail { background: #4a1515; color: #f85149; border: 1px solid #da3633; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-running { background: #1c2a3a; color: #58a6ff; border: 1px solid #388bfd; padding: 3px 12px; border-radius: 20px; font-size: 12px; }
+
+    .steps { padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+    .step { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; }
+    .step-label { padding: 8px 12px; background: #161b22; border-bottom: 1px solid #21262d; font-size: 12px; color: #8b949e; font-family: monospace; }
+    .step-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .http-lbl { font-size: 11px; color: #6e7681; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .http-box { background: #010409; border: 1px solid #21262d; border-radius: 6px; padding: 8px 10px; font-family: monospace; font-size: 12px; white-space: pre-wrap; overflow-x: auto; line-height: 1.5; }
+    .m-get { color: #3fb950; font-weight: 700; }
+    .m-post { color: #58a6ff; font-weight: 700; }
+    .s-2xx { color: #3fb950; } .s-4xx { color: #f85149; }
+    .assertions { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
+    .ass { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; padding: 2px 0; font-family: monospace; }
+    .ass.ok { color: #3fb950; } .ass.ng { color: #f85149; }
+
+    .placeholder { text-align: center; padding: 60px 20px; color: #6e7681; font-size: 14px; }
+
+    .products { display: flex; gap: 10px; margin-bottom: 20px; }
+    .product-card { flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px 14px; }
+    .product-card.has-stock { border-color: #238636; }
+    .product-card.sold-out { border-color: #da3633; }
+    .product-card.low-stock { border-color: #9e6a03; }
+    .p-id { font-family: monospace; font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+    .p-name { font-size: 13px; color: #e6edf3; font-weight: 600; margin-bottom: 8px; }
+    .p-stock { display: flex; align-items: center; gap: 6px; }
+    .p-stock-num { font-size: 22px; font-weight: 700; }
+    .p-stock-label { font-size: 11px; color: #8b949e; }
+    .stock-green { color: #3fb950; }
+    .stock-yellow { color: #d29922; }
+    .stock-red { color: #f85149; }
+    .p-badge { display: inline-block; margin-top: 6px; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .badge-soldout { background: #4a1515; color: #f85149; }
+    .badge-low { background: #2d1f03; color: #d29922; }
+    .badge-normal { background: #1a4731; color: #3fb950; }
+
+    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #30363d; border-top-color: #58a6ff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>B마트 재고 API 테스트 러너</h1>
+  <span class="tag">Stub Server</span>
+</header>
+<main>
+  <div class="controls">
+    <select id="sel">
+      <option value="">— 테스트 케이스 선택 —</option>
+      <optgroup label="재고 조회 (GET /stock)">
+        <option value="0">TC-01: 재고 있는 상품 조회</option>
+        <option value="1">TC-02: 품절 상품 조회</option>
+        <option value="2">TC-03: 존재하지 않는 상품 조회</option>
+      </optgroup>
+      <optgroup label="주문 생성 (POST /orders)">
+        <option value="3">TC-04: 정상 주문 → 재고 차감</option>
+        <option value="4">TC-05: 재고 1개 주문 → 품절 전환</option>
+        <option value="5">TC-06: 품절 상품 주문</option>
+        <option value="6">TC-07: 존재하지 않는 상품 주문</option>
+        <option value="7">TC-08: quantity = 0</option>
+        <option value="8">TC-09: 수량이 재고 초과</option>
+        <option value="14">TC-15: quantity = -1 (음수)</option>
+        <option value="15">TC-16: quantity = 1.5 (소수점)</option>
+      </optgroup>
+      <optgroup label="주문 취소 (POST /cancel)">
+        <option value="9">TC-10: 정상 취소 → 재고 복구</option>
+        <option value="10">TC-11: 존재하지 않는 주문 취소</option>
+        <option value="11">TC-12: 이미 취소된 주문 재취소</option>
+        <option value="12">TC-13: 취소 후 재주문 성공</option>
+      </optgroup>
+      <optgroup label="동시성">
+        <option value="13">TC-14: 재고 1개 + 수십ms 간격 동시 요청</option>
+      </optgroup>
+    </select>
+    <button class="btn" id="runOneBtn" onclick="runOne()" disabled>실행</button>
+    <button class="btn btn-green" onclick="runAll()">전체 실행</button>
+  </div>
+
+  <div class="products" id="products">
+    <div class="product-card has-stock">
+      <div class="p-id">P001</div>
+      <div class="p-name">떡볶이 세트</div>
+      <div class="p-stock">
+        <span class="p-stock-num stock-green" id="stock-P001">10</span>
+        <span class="p-stock-label">개</span>
+      </div>
+      <span class="p-badge badge-normal">재고 있음</span>
+    </div>
+    <div class="product-card low-stock">
+      <div class="p-id">P002</div>
+      <div class="p-name">순대국밥</div>
+      <div class="p-stock">
+        <span class="p-stock-num stock-yellow" id="stock-P002">1</span>
+        <span class="p-stock-label">개</span>
+      </div>
+      <span class="p-badge badge-low">동시성 테스트용</span>
+    </div>
+    <div class="product-card sold-out">
+      <div class="p-id">P003</div>
+      <div class="p-name">김밥 도시락</div>
+      <div class="p-stock">
+        <span class="p-stock-num stock-red" id="stock-P003">0</span>
+        <span class="p-stock-label">개</span>
+      </div>
+      <span class="p-badge badge-soldout">품절</span>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <div id="result"><div class="placeholder">케이스를 선택한 후 실행 버튼을 눌러주세요.</div></div>
+</main>
+
+<script>
+const BASE = window.location.origin
+
+async function http(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } }
+  if (body !== undefined) opts.body = JSON.stringify(body)
+  const res = await fetch(BASE + path, opts)
+  let data = null
+  try { data = await res.json() } catch(e) {}
+  return { status: res.status, body: data }
+}
+
+async function reset() {
+  const r = await http('POST', '/v1/test/reset')
+  await refreshStocks()
+  return r
+}
+
+async function refreshStocks() {
+  for (const id of ['P001', 'P002', 'P003']) {
+    const r = await http('GET', `/v1/products/${id}/stock`)
+    const el = document.getElementById(`stock-${id}`)
+    if (el && r.body) el.textContent = r.body.stock
+  }
+}
+
+// ── Test case definitions ──────────────────────────────────────────────────
+
+const CASES = [
+  // TC-01
+  {
+    id: 'TC-01', name: '재고 있는 상품 조회',
+    desc: 'P001(떡볶이 세트, 재고 10개)을 조회해 stock과 soldOut=false를 검증합니다.',
+    async run() {
+      await reset()
+      const r = await http('GET', '/v1/products/P001/stock')
+      return steps([
+        step('GET /v1/products/P001/stock', { method:'GET', url:'/v1/products/P001/stock' }, r, [
+          ass(`status === 200`, r.status === 200),
+          ass(`stock (재고 수량) === 10  (실제: ${r.body?.stock})`, r.body?.stock === 10),
+          ass(`soldOut (품절 여부) === false  (실제: ${r.body?.soldOut})`, r.body?.soldOut === false),
+        ])
+      ])
+    }
+  },
+  // TC-02
+  {
+    id: 'TC-02', name: '품절 상품 조회',
+    desc: 'P003(김밥 도시락, 재고 0개)을 조회해 soldOut=true를 검증합니다.',
+    async run() {
+      await reset()
+      const r = await http('GET', '/v1/products/P003/stock')
+      return steps([
+        step('GET /v1/products/P003/stock', { method:'GET', url:'/v1/products/P003/stock' }, r, [
+          ass(`status === 200`, r.status === 200),
+          ass(`stock (재고 수량) === 0  (실제: ${r.body?.stock})`, r.body?.stock === 0),
+          ass(`soldOut (품절 여부) === true  (실제: ${r.body?.soldOut})`, r.body?.soldOut === true),
+        ])
+      ])
+    }
+  },
+  // TC-03
+  {
+    id: 'TC-03', name: '존재하지 않는 상품 조회',
+    desc: '없는 상품(P999)을 조회하면 404를 반환해야 합니다.',
+    async run() {
+      await reset()
+      const r = await http('GET', '/v1/products/P999/stock')
+      return steps([
+        step('GET /v1/products/P999/stock', { method:'GET', url:'/v1/products/P999/stock' }, r, [
+          ass(`status === 404`, r.status === 404),
+          ass(`error (에러 코드) === PRODUCT_NOT_FOUND  (실제: ${r.body?.error})`, r.body?.error === 'PRODUCT_NOT_FOUND'),
+        ])
+      ])
+    }
+  },
+  // TC-04
+  {
+    id: 'TC-04', name: '정상 주문 → 재고 차감',
+    desc: 'P001(재고 10개)에 3개 주문 후 재고가 7개로 줄어드는지 검증합니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P001', quantity:3, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      const s = await http('GET', '/v1/products/P001/stock')
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 201`, r.status === 201),
+          ass(`orderId (주문 번호) 발급됨  (실제: ${r.body?.orderId})`, !!r.body?.orderId),
+          ass(`remainingStock (주문 후 남은 재고) === 7  (실제: ${r.body?.remainingStock})`, r.body?.remainingStock === 7),
+        ]),
+        step('GET /v1/products/P001/stock (재고 확인)', { method:'GET', url:'/v1/products/P001/stock' }, s, [
+          ass(`stock (재고 수량) === 7  (실제: ${s.body?.stock})`, s.body?.stock === 7),
+        ])
+      ])
+    }
+  },
+  // TC-05
+  {
+    id: 'TC-05', name: '재고 1개 주문 → 품절 전환',
+    desc: 'P002(재고 1개)를 주문하면 즉시 품절(soldOut=true)로 전환됩니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P002', quantity:1, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      const s = await http('GET', '/v1/products/P002/stock')
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 201`, r.status === 201),
+          ass(`remainingStock (주문 후 남은 재고) === 0  (실제: ${r.body?.remainingStock})`, r.body?.remainingStock === 0),
+          ass(`soldOut (품절 여부) === true  (실제: ${r.body?.soldOut})`, r.body?.soldOut === true),
+        ]),
+        step('GET /v1/products/P002/stock (품절 확인)', { method:'GET', url:'/v1/products/P002/stock' }, s, [
+          ass(`stock (재고 수량) === 0  (실제: ${s.body?.stock})`, s.body?.stock === 0),
+          ass(`soldOut (품절 여부) === true  (실제: ${s.body?.soldOut})`, s.body?.soldOut === true),
+        ])
+      ])
+    }
+  },
+  // TC-06
+  {
+    id: 'TC-06', name: '품절 상품 주문',
+    desc: 'P003(품절)을 주문하면 409 OUT_OF_STOCK을 반환해야 합니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P003', quantity:1, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 409`, r.status === 409),
+          ass(`error (에러 코드) === OUT_OF_STOCK  (실제: ${r.body?.error})`, r.body?.error === 'OUT_OF_STOCK'),
+        ])
+      ])
+    }
+  },
+  // TC-07
+  {
+    id: 'TC-07', name: '존재하지 않는 상품 주문',
+    desc: 'P999(없는 상품)을 주문하면 404를 반환해야 합니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P999', quantity:1, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 404`, r.status === 404),
+          ass(`error (에러 코드) === PRODUCT_NOT_FOUND  (실제: ${r.body?.error})`, r.body?.error === 'PRODUCT_NOT_FOUND'),
+        ])
+      ])
+    }
+  },
+  // TC-08
+  {
+    id: 'TC-08', name: 'quantity = 0',
+    desc: 'quantity를 0으로 주문하면 400 INVALID_QUANTITY를 반환해야 합니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P001', quantity:0, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 400`, r.status === 400),
+          ass(`error (에러 코드) === INVALID_QUANTITY (유효하지 않은 수량)  (실제: ${r.body?.error})`, r.body?.error === 'INVALID_QUANTITY'),
+        ])
+      ])
+    }
+  },
+  // TC-09
+  {
+    id: 'TC-09', name: '수량이 재고 초과',
+    desc: 'P001(재고 10개)에 99개 주문하면 409 INSUFFICIENT_STOCK을 반환해야 합니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P001', quantity:99, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 409`, r.status === 409),
+          ass(`error (에러 코드) === INSUFFICIENT_STOCK (재고 부족)  (실제: ${r.body?.error})`, r.body?.error === 'INSUFFICIENT_STOCK'),
+        ])
+      ])
+    }
+  },
+  // TC-10
+  {
+    id: 'TC-10', name: '정상 취소 → 재고 복구',
+    desc: '주문 생성 후 취소하면 차감된 재고(3개)가 복구되어 stock=10이 되어야 합니다.',
+    async run() {
+      await reset()
+      const orderBody = { productId:'P001', quantity:3, customerId:'C001' }
+      const o = await http('POST', '/v1/orders', orderBody)
+      const orderId = o.body?.orderId
+      const c = await http('POST', `/v1/orders/${orderId}/cancel`)
+      const s = await http('GET', '/v1/products/P001/stock')
+      return steps([
+        step('POST /v1/orders (사전 준비)', { method:'POST', url:'/v1/orders', body:orderBody }, o, [
+          ass(`주문 생성 성공 (orderId: ${orderId})`, o.status === 201),
+        ]),
+        step(`POST /v1/orders/${orderId}/cancel`, { method:'POST', url:`/v1/orders/${orderId}/cancel` }, c, [
+          ass(`status === 200`, c.status === 200),
+          ass(`status (주문 상태) === CANCELLED (취소됨)`, c.body?.status === 'CANCELLED'),
+          ass(`currentStock (취소 후 현재 재고) === 10  (실제: ${c.body?.currentStock})`, c.body?.currentStock === 10),
+          ass(`availableForPurchase (재구매 가능 여부) === true  (실제: ${c.body?.availableForPurchase})`, c.body?.availableForPurchase === true),
+        ]),
+        step('GET /v1/products/P001/stock (재고 복구 확인)', { method:'GET', url:'/v1/products/P001/stock' }, s, [
+          ass(`stock (재고 수량) === 10  (실제: ${s.body?.stock})`, s.body?.stock === 10),
+          ass(`soldOut (품절 여부) === false  (실제: ${s.body?.soldOut})`, s.body?.soldOut === false),
+        ])
+      ])
+    }
+  },
+  // TC-11
+  {
+    id: 'TC-11', name: '존재하지 않는 주문 취소',
+    desc: '없는 주문(O9999)을 취소하면 404 ORDER_NOT_FOUND를 반환해야 합니다.',
+    async run() {
+      await reset()
+      const r = await http('POST', '/v1/orders/O9999/cancel')
+      return steps([
+        step('POST /v1/orders/O9999/cancel', { method:'POST', url:'/v1/orders/O9999/cancel' }, r, [
+          ass(`status === 404`, r.status === 404),
+          ass(`error (에러 코드) === ORDER_NOT_FOUND (존재하지 않는 주문)  (실제: ${r.body?.error})`, r.body?.error === 'ORDER_NOT_FOUND'),
+        ])
+      ])
+    }
+  },
+  // TC-12
+  {
+    id: 'TC-12', name: '이미 취소된 주문 재취소',
+    desc: '이미 취소된 주문을 다시 취소하면 409 ALREADY_CANCELLED를 반환해야 합니다.',
+    async run() {
+      await reset()
+      const o = await http('POST', '/v1/orders', { productId:'P001', quantity:1, customerId:'C001' })
+      const orderId = o.body?.orderId
+      await http('POST', `/v1/orders/${orderId}/cancel`)
+      const r = await http('POST', `/v1/orders/${orderId}/cancel`)
+      return steps([
+        step('주문 생성 + 1차 취소 (사전 준비)', { method:'POST', url:'/v1/orders' }, o, [
+          ass(`주문 생성 및 취소 완료 (orderId: ${orderId})`, o.status === 201),
+        ]),
+        step(`POST /v1/orders/${orderId}/cancel (2차 시도)`, { method:'POST', url:`/v1/orders/${orderId}/cancel` }, r, [
+          ass(`status === 409`, r.status === 409),
+          ass(`error (에러 코드) === ALREADY_CANCELLED (이미 취소된 주문)  (실제: ${r.body?.error})`, r.body?.error === 'ALREADY_CANCELLED'),
+        ])
+      ])
+    }
+  },
+  // TC-13
+  {
+    id: 'TC-13', name: '취소 후 재주문 성공',
+    desc: 'P002(재고 1개) 주문 → 취소 → 재고 복구 → 다른 고객 재주문 성공까지의 플로우를 검증합니다.',
+    async run() {
+      await reset()
+      const o = await http('POST', '/v1/orders', { productId:'P002', quantity:1, customerId:'C001' })
+      const orderId = o.body?.orderId
+      const c = await http('POST', `/v1/orders/${orderId}/cancel`)
+      const r = await http('POST', '/v1/orders', { productId:'P002', quantity:1, customerId:'C002' })
+      return steps([
+        step('POST /v1/orders — 1차 주문', { method:'POST', url:'/v1/orders', body:{productId:'P002',quantity:1} }, o, [
+          ass(`주문 성공 + 품절 전환`, o.status === 201 && o.body?.soldOut === true),
+        ]),
+        step(`POST /v1/orders/${orderId}/cancel — 취소`, { method:'POST', url:`/v1/orders/${orderId}/cancel` }, c, [
+          ass(`취소 성공 + currentStock (취소 후 현재 재고) 복구  (실제: ${c.body?.currentStock})`, c.status === 200 && c.body?.currentStock === 1),
+        ]),
+        step('POST /v1/orders — 다른 고객 재주문', { method:'POST', url:'/v1/orders', body:{productId:'P002',quantity:1,customerId:'C002'} }, r, [
+          ass(`status === 201 (재주문 성공)`, r.status === 201),
+          ass(`soldOut === true (재품절)`, r.body?.soldOut === true),
+        ])
+      ])
+    }
+  },
+  // TC-14
+  {
+    id: 'TC-14', name: '재고 1개 + 수십ms 간격 동시 요청',
+    desc: '고객 A(t=0ms)와 B(t=30ms)가 거의 동시에 P002를 주문 — 정확히 1건 성공, 1건 품절 처리되어야 합니다.',
+    async run() {
+      await reset()
+      const bodyA = { productId:'P002', quantity:1, customerId:'customer-A' }
+      const bodyB = { productId:'P002', quantity:1, customerId:'customer-B' }
+      const promA = http('POST', '/v1/orders', bodyA)
+      await new Promise(r => setTimeout(r, 30))
+      const promB = http('POST', '/v1/orders', bodyB)
+      const [rA, rB] = await Promise.all([promA, promB])
+      const successCount = [rA.status, rB.status].filter(s => s === 201).length
+      const failCount    = [rA.status, rB.status].filter(s => s === 409).length
+      const failed = rA.status === 409 ? rA : rB
+      const succeeded = rA.status === 201 ? rA : rB
+      return steps([
+        step('고객 A 요청 (t=0ms)', { method:'POST', url:'/v1/orders', body:bodyA }, rA, []),
+        step('고객 B 요청 (t=30ms)', { method:'POST', url:'/v1/orders', body:bodyB }, rB, []),
+        step('동시성 결과 검증', null, null, [
+          ass(`성공(201) 1건, 품절(409) 1건  (실제: A=${rA.status}, B=${rB.status})`, successCount === 1 && failCount === 1),
+          ass(`실패 요청 error (에러 코드) === OUT_OF_STOCK  (실제: ${failed.body?.error})`, failed.body?.error === 'OUT_OF_STOCK'),
+          ass(`성공 요청 soldOut (품절 여부) === true  (실제: ${succeeded.body?.soldOut})`, succeeded.body?.soldOut === true),
+        ])
+      ])
+    }
+  },
+  // TC-15
+  {
+    id: 'TC-15', name: 'quantity = -1 (음수)',
+    desc: 'quantity를 음수(-1)로 주문하면 400 INVALID_QUANTITY를 반환해야 합니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P001', quantity:-1, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 400`, r.status === 400),
+          ass(`error (에러 코드) === INVALID_QUANTITY (유효하지 않은 수량)  (실제: ${r.body?.error})`, r.body?.error === 'INVALID_QUANTITY'),
+        ])
+      ])
+    }
+  },
+  // TC-16
+  {
+    id: 'TC-16', name: 'quantity = 1.5 (소수점)',
+    desc: 'quantity를 소수점(1.5)으로 주문하면 400 INVALID_QUANTITY를 반환해야 합니다.',
+    async run() {
+      await reset()
+      const body = { productId:'P001', quantity:1.5, customerId:'C001' }
+      const r = await http('POST', '/v1/orders', body)
+      return steps([
+        step('POST /v1/orders', { method:'POST', url:'/v1/orders', body }, r, [
+          ass(`status === 400`, r.status === 400),
+          ass(`error (에러 코드) === INVALID_QUANTITY (유효하지 않은 수량)  (실제: ${r.body?.error})`, r.body?.error === 'INVALID_QUANTITY'),
+        ])
+      ])
+    }
+  },
+]
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function steps(list) { return list }
+function step(label, req, res, assertions) { return { label, req, res, assertions } }
+function ass(msg, ok) { return { msg, ok } }
+
+// ── Render ─────────────────────────────────────────────────────────────────
+
+function fmtBody(b) {
+  return b !== null && b !== undefined ? JSON.stringify(b, null, 2) : '—'
+}
+
+function renderSteps(stepsArr) {
+  return stepsArr.map(s => {
+    const methodClass = s.req?.method === 'GET' ? 'm-get' : 'm-post'
+    const statusClass = s.res?.status >= 200 && s.res?.status < 300 ? 's-2xx' : 's-4xx'
+
+    const reqHtml = s.req ? `
+      <div class="http-lbl">Request</div>
+      <div class="http-box"><span class="${methodClass}">${s.req.method}</span> ${s.req.url}${s.req.body ? '\n\n' + JSON.stringify(s.req.body, null, 2) : ''}</div>
+    ` : ''
+
+    const resHtml = s.res ? `
+      <div class="http-lbl">Response</div>
+      <div class="http-box"><span class="${statusClass}">${s.res.status}</span>\n\n${fmtBody(s.res.body)}</div>
+    ` : ''
+
+    const assertHtml = s.assertions.length ? `
+      <div class="http-lbl">Assertions</div>
+      <div class="assertions">
+        ${s.assertions.map(a => `<div class="ass ${a.ok ? 'ok' : 'ng'}">${a.ok ? '✅' : '❌'} ${a.msg}</div>`).join('')}
+      </div>
+    ` : ''
+
+    return `
+      <div class="step">
+        <div class="step-label">${s.label}</div>
+        <div class="step-body">${reqHtml}${resHtml}${assertHtml}</div>
+      </div>
+    `
+  }).join('')
+}
+
+function allPassed(stepsArr) {
+  return stepsArr.every(s => s.assertions.every(a => a.ok))
+}
+
+function renderCard(tc, stepsArr) {
+  const passed = allPassed(stepsArr)
+  const badge = passed
+    ? `<span class="badge-pass">PASS</span>`
+    : `<span class="badge-fail">FAIL</span>`
+  return `
+    <div class="result-card">
+      <div class="card-head">
+        <span class="card-id">${tc.id}</span>
+        <span class="card-name">${tc.name}</span>
+        ${badge}
+      </div>
+      <div class="card-desc">${tc.desc}</div>
+      <div class="steps">${renderSteps(stepsArr)}</div>
+    </div>
+  `
+}
+
+// ── Runner ─────────────────────────────────────────────────────────────────
+
+const sel = document.getElementById('sel')
+const runOneBtn = document.getElementById('runOneBtn')
+const resultEl = document.getElementById('result')
+const summaryEl = document.getElementById('summary')
+
+sel.addEventListener('change', () => {
+  const idx = sel.value
+  runOneBtn.disabled = idx === ''
+  if (idx === '') {
+    resultEl.innerHTML = '<div class="placeholder">케이스를 선택한 후 실행 버튼을 눌러주세요.</div>'
+    return
+  }
+  const tc = CASES[parseInt(idx)]
+  resultEl.innerHTML = `
+    <div class="result-card">
+      <div class="card-head">
+        <span class="card-id">${tc.id}</span>
+        <span class="card-name">${tc.name}</span>
+        <span class="badge-running">대기 중</span>
+      </div>
+      <div class="card-desc">${tc.desc}</div>
+      <div class="steps" style="padding:16px 18px;">
+        <div style="color:#6e7681; font-size:13px;">실행 버튼을 눌러 검증을 시작하세요.</div>
+      </div>
+    </div>`
+})
+
+async function runOne() {
+  const idx = sel.value
+  if (idx === '') return
+  const tc = CASES[parseInt(idx)]
+  summaryEl.style.display = 'none'
+  runOneBtn.disabled = true
+
+  resultEl.innerHTML = `
+    <div class="result-card">
+      <div class="card-head">
+        <span class="card-id">${tc.id}</span>
+        <span class="card-name">${tc.name}</span>
+        <span class="badge-running"><span class="spinner"></span> 실행 중</span>
+      </div>
+    </div>`
+
+  try {
+    const stepsArr = await tc.run()
+    resultEl.innerHTML = renderCard(tc, stepsArr)
+  } catch(e) {
+    resultEl.innerHTML = `<div class="result-card"><div class="card-head"><span class="card-id">${tc.id}</span><span class="card-name">${tc.name}</span><span class="badge-fail">ERROR</span></div><div class="card-desc" style="color:#f85149">${e.message}</div></div>`
+  }
+  await refreshStocks()
+  runOneBtn.disabled = false
+}
+
+async function runAll() {
+  summaryEl.style.display = 'none'
+  resultEl.innerHTML = `<div class="placeholder"><span class="spinner"></span> 전체 실행 중... (${CASES.length}개)</div>`
+
+  const results = []
+  for (const tc of CASES) {
+    try {
+      const stepsArr = await tc.run()
+      results.push({ tc, stepsArr, error: null })
+    } catch(e) {
+      results.push({ tc, stepsArr: [], error: e.message })
+    }
+  }
+
+  const passed = results.filter(r => !r.error && allPassed(r.stepsArr))
+  const failed = results.filter(r => r.error || !allPassed(r.stepsArr))
+
+  summaryEl.style.display = 'block'
+  summaryEl.innerHTML = `
+    <div class="summary-title">전체 실행 결과</div>
+    <div class="summary-nums">
+      <div class="snum"><div class="n n-total">${CASES.length}</div><div class="l">전체</div></div>
+      <div class="snum"><div class="n n-pass">${passed.length}</div><div class="l">PASS</div></div>
+      <div class="snum"><div class="n n-fail">${failed.length}</div><div class="l">FAIL</div></div>
+    </div>
+    <div class="mini-list">
+      ${results.map(r => {
+        const ok = !r.error && allPassed(r.stepsArr)
+        return `<div class="mini ${ok ? 'pass' : 'fail'}">
+          <span class="mini-id">${r.tc.id}</span>
+          <span class="mini-name">${r.tc.name}</span>
+          <span class="mini-status">${ok ? '✅' : '❌'}</span>
+        </div>`
+      }).join('')}
+    </div>
+  `
+  resultEl.innerHTML = ''
+}
+</script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import path from 'path'
 import express, { Request, Response } from 'express'
 import swaggerUi from 'swagger-ui-express'
 import { store } from './store'
@@ -95,6 +96,11 @@ const swaggerSpec = {
 }
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
+// 테스트 러너 UI
+app.get('/', (_req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, 'test-runner.html'))
+})
 
 // GET /v1/products/:productId/stock — 재고 조회
 app.get('/v1/products/:productId/stock', (req: Request, res: Response) => {

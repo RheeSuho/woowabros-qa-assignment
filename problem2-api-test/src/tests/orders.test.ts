@@ -57,6 +57,20 @@ describe('주문 생성 POST /v1/orders', () => {
     expect(res.status).toBe(409)
     expect(res.body.error).toBe('INSUFFICIENT_STOCK')
   })
+
+  it('TC-15: quantity가 음수(-1)이면 400과 INVALID_QUANTITY를 반환한다', async () => {
+    const res = await createOrder(PRODUCTS.NORMAL.productId, -1)
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('INVALID_QUANTITY')
+  })
+
+  it('TC-16: quantity가 소수점(1.5)이면 400과 INVALID_QUANTITY를 반환한다', async () => {
+    const res = await createOrder(PRODUCTS.NORMAL.productId, 1.5)
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('INVALID_QUANTITY')
+  })
 })
 
 describe('주문 취소 POST /v1/orders/:orderId/cancel', () => {
