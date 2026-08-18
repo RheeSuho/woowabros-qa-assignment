@@ -200,7 +200,32 @@ adb logcat -d | grep -E "Exception|Error|ANR|FATAL"
 
 ---
 
+## 실행 방법
+
+실제 배달의민족 앱과 Android 기기(또는 에뮬레이터) 없이는 실행이 불가합니다.  
+과제 요구사항("실행 환경이 없어도 무방하며, 설계 의도가 드러나는 완성된 코드 형태면 충분")에 따라 코드 형태로 제출합니다.
+
+실제 프로젝트에 적용할 경우 아래 환경이 필요합니다:
+- Android Studio (Android Gradle Plugin)
+- 배달의민족 앱 설치된 기기 또는 에뮬레이터
+- `./gradlew connectedAndroidTest` 로 실행
+
+```
+app/
+├── build.gradle        # androidTestImplementation 의존성 선언
+└── src/androidTest/    # 본 코드 위치
+```
+
+---
+
 ## AI 도구 활용
 
-- **Claude Code**: 문제점 분석 체계화 및 Page Object 구조 설계 검토에 활용
-- 코드 작성은 실제 UIAutomator/Kotlin 패턴을 직접 적용했으며, AI가 제안한 구조는 검토 후 프로젝트 맥락에 맞게 조정
+본 문제는 **Claude Code** (Anthropic)를 활용해 작성했습니다.
+
+| 단계 | 활용 내용 | 직접 결정한 부분 |
+|------|----------|----------------|
+| 코드 리뷰 | 10개 문제점 항목 구조화 및 표 형식 정리 | 문제점 직접 식별 (NPE, Thread.sleep, assertNotNull 등) |
+| 리팩토링 | Kotlin 문법 표현, BasePage 유틸 메서드 초안 | Page Object 분리 기준, waitUntilLoaded 패턴 채택 여부 |
+| Flaky 분석 | 추적 단계 서술 표현 다듬기 | 단계별 원인 가설과 우선순위 판단 |
+
+> UIAutomator를 직접 운영한 경험은 없으나, Playwright 웹 자동화에서 검증한 설계 원칙(조건부 대기, POM, 강한 assertion, 실패 증거 수집)을 모바일 컨텍스트에 적용했습니다.
