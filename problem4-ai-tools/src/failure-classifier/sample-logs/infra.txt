@@ -1,0 +1,12 @@
+FAILED: OrderFlowTest > 정상_주문_플로우_결제_완료_후_접수_대기_상태_확인
+
+com.android.ddmlib.AdbCommandRejectedException: device offline
+	at com.android.ddmlib.AdbHelper.checkResult(AdbHelper.java:455)
+	at com.android.ddmlib.AdbHelper.executeRemoteCommand(AdbHelper.java:346)
+
+Caused by: java.net.ConnectException: Connection refused (Connection refused)
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:350)
+
+[CI] Android emulator did not boot within 120 seconds. Aborting.
+Duration: 120.3s

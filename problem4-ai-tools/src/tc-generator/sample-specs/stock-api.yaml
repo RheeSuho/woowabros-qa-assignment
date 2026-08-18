@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: B마트 재고 API
+  version: 1.0.0
+  description: 문제2에서 설계한 B마트 재고 관리 API 명세
+
+paths:
+  /v1/products/{productId}/stock:
+    get:
+      summary: 재고 조회
+      description: 장바구니 담기 시점에 호출. 재고를 차감하지 않음.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId: { type: string }
+                  name: { type: string }
+                  stock: { type: integer }
+                  soldOut: { type: boolean }
+        '404':
+          description: 존재하지 않는 상품 (PRODUCT_NOT_FOUND)
+
+  /v1/orders:
+    post:
+      summary: 주문 생성 (재고 차감)
+      description: 결제 완료 시 호출. 동시 주문은 선착순 처리.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, quantity]
+              properties:
+                productId: { type: string }
+                quantity: { type: integer, minimum: 1 }
+                customerId: { type: string }
+      responses:
+        '201':
+          description: 주문 성공 — 재고 차감됨
+        '400':
+          description: INVALID_QUANTITY (quantity가 0 이하 또는 정수 아님)
+        '404':
+          description: PRODUCT_NOT_FOUND
+        '409':
+          description: OUT_OF_STOCK 또는 INSUFFICIENT_STOCK
+
+  /v1/orders/{orderId}/cancel:
+    post:
+      summary: 주문 취소 (재고 복구)
+      description: 취소 즉시 재고 복구. 다른 고객이 즉시 구매 가능.
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 취소 성공 — 재고 복구됨
+        '404':
+          description: ORDER_NOT_FOUND
+        '409':
+          description: ALREADY_CANCELLED

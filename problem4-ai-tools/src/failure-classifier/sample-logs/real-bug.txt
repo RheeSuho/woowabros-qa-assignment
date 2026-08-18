@@ -1,0 +1,10 @@
+FAILED: OrderFlowTest > 정상_주문_플로우_결제_완료_후_접수_대기_상태_확인
+
+junit.framework.AssertionFailedError: 주문 상태가 일치하지 않습니다.
+  기대: 접수 대기
+  실제: 결제 실패
+	at com.baemin.e2e.pages.OrderStatusPage.assertStatus(OrderStatusPage.kt:38)
+	at com.baemin.e2e.tests.OrderFlowTest.정상_주문_플로우_결제_완료_후_접수_대기_상태_확인(OrderFlowTest.kt:45)
+
+Note: Failed consistently across 3 runs (run #1, #2, #3 all failed with same error).
+Duration: 12.4s
