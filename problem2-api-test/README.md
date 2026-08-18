@@ -54,7 +54,6 @@ Stub server running
 
 > **API 직접 실행하기:**
 > - **인터랙티브 테스트 러너**: **http://localhost:3000** — 드롭다운으로 케이스 선택 후 바로 실행
-> - **Swagger UI**: **http://localhost:3000/api-docs** — `Try it out` → `Execute`로 직접 요청
 >
 > **초기 상품 데이터:**
 > | productId | 상품명 | 초기 재고 |
