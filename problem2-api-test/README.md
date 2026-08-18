@@ -37,17 +37,18 @@ API를 브라우저에서 직접 실행해볼 수 있는 테스트 러너를 제
 npx ts-node src/server/stub-server.ts
 ```
 
-서버 시작 시 로컬 및 네트워크 주소가 출력됩니다:
+서버 시작 시 로컬, 네트워크, 외부 공개 주소가 모두 출력됩니다:
 
 ```
 Stub server running
   Local   : http://localhost:3000
   Network : http://192.168.x.x:3000
-  Test UI : http://192.168.x.x:3000/
+  Public  : https://xxxx.loca.lt  ← 외부 접속용 (인터넷 어디서나)
 ```
 
 - **같은 PC**: `http://localhost:3000` 접속
 - **같은 네트워크의 다른 기기**: 출력된 Network 주소로 접속
+- **외부 네트워크 (다른 와이파이 등)**: 출력된 Public 주소로 접속 — 별도 설정 불필요
 - 드롭다운에서 케이스 선택 → **실행** 버튼으로 API 검증
 - **전체 실행** 버튼으로 16개 케이스 일괄 실행
 

@@ -203,9 +203,11 @@ app.post('/v1/test/reset', (_req: Request, res: Response) => {
 if (require.main === module) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const os = require('os')
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const localtunnel = require('localtunnel')
   const PORT = 3000
 
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT, '0.0.0.0', async () => {
     const nets = os.networkInterfaces() as Record<string, Array<{ family: string; address: string; internal: boolean }>>
     const localIp = Object.values(nets)
       .flat()
@@ -214,6 +216,15 @@ if (require.main === module) {
     console.log(`\nStub server running`)
     console.log(`  Local   : http://localhost:${PORT}`)
     console.log(`  Network : http://${localIp}:${PORT}`)
-    console.log(`  Test UI : http://${localIp}:${PORT}/\n`)
+
+    try {
+      const tunnel = await localtunnel({ port: PORT })
+      console.log(`  Public  : ${tunnel.url}  ← 외부 접속용 (인터넷 어디서나)`)
+      tunnel.on('error', () => {})
+    } catch {
+      console.log(`  Public  : (터널 연결 실패 — 네트워크 주소 사용)`)
+    }
+
+    console.log()
   })
 }
