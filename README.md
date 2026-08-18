@@ -9,6 +9,17 @@
 
 ---
 
+## 문제1: 테스트 자동화 전략 설계
+
+📂 [docs/problem1-strategy.md](docs/problem1-strategy.md)
+
+**설계 의도**
+- 2주 오픈 일정을 고려해 ROI 기준으로 자동화 대상을 선별 — API 통합 70% 우선, E2E 10%는 Happy Path만
+- Flaky 감지·격리·재시도·원인 분석 4단계 정책으로 CI 안정성 확보
+- 수동으로 남겨야 하는 항목(Push 알림 UX, 탐색적 테스트 등)을 명확히 구분해 자동화 과잉 투자 방지
+
+---
+
 ## 문제2: B마트 재고 API 테스트 자동화
 
 📂 [problem2-api-test/README.md](problem2-api-test/README.md)
