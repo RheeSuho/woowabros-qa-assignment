@@ -2,11 +2,43 @@
 
 ## 실행 방법
 
+**사전 조건**: Node.js 18 이상
+
 ```bash
+# 1. 디렉토리 이동
 cd problem2-api-test
+
+# 2. 의존성 설치
 npm install
+
+# 3. 전체 테스트 실행
 npm test
 ```
+
+**정상 실행 시 출력 예시:**
+
+```
+ RUN  v1.6.1
+
+ ✓ src/tests/stock.test.ts        (3 tests)
+ ✓ src/tests/orders.test.ts      (10 tests)
+ ✓ src/tests/concurrency.test.ts  (1 test)
+
+ Test Files  3 passed (3)
+      Tests  14 passed (14)
+   Duration  ~1s
+```
+
+> **참고**: Stub 서버를 단독으로 띄워서 직접 curl로 확인하고 싶다면:
+> ```bash
+> npx ts-node src/server/stub-server.ts
+> # → http://localhost:3000 으로 접근 가능
+>
+> curl http://localhost:3000/v1/products/P001/stock
+> curl -X POST http://localhost:3000/v1/orders \
+>   -H "Content-Type: application/json" \
+>   -d '{"productId":"P001","quantity":2,"customerId":"C001"}'
+> ```
 
 ---
 
