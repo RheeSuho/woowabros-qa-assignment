@@ -19,8 +19,10 @@ const INITIAL_PRODUCTS: Product[] = [
   { productId: 'P003', name: '김밥 도시락', stock: 0 },
 ]
 
-// DB 조회 시뮬레이션 지연 (ms)
-// 동시성 테스트에서 A가 락을 보유하는 동안 B가 도달하도록 50ms 사용
+// DB 조회 시뮬레이션 지연 — 실제 DB가 없으므로 임의로 설정한 값 (50ms)
+// 역할: A 요청(t=0ms)이 이 딜레이 동안 락을 보유하는 사이,
+//       B 요청(t=30ms)이 도달해 락을 대기하도록 유도.
+//       B 도달 시점(30ms) < DB_DELAY_MS(50ms) 를 만족해야 동시성 시나리오가 성립함.
 const DB_DELAY_MS = 50
 
 class Store {
