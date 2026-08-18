@@ -29,16 +29,22 @@ npm test
    Duration  ~1s
 ```
 
-> **참고**: Stub 서버를 단독으로 띄워서 직접 curl로 확인하고 싶다면:
+> **Swagger UI로 API 직접 실행하기:**
 > ```bash
 > npx ts-node src/server/stub-server.ts
-> # → http://localhost:3000 으로 접근 가능
->
-> curl http://localhost:3000/v1/products/P001/stock
-> curl -X POST http://localhost:3000/v1/orders \
->   -H "Content-Type: application/json" \
->   -d '{"productId":"P001","quantity":2,"customerId":"C001"}'
 > ```
+> 서버 실행 후 브라우저에서 **http://localhost:3000/api-docs** 접속
+>
+> 각 엔드포인트의 `Try it out` → `Execute` 버튼으로 실제 요청을 보낼 수 있습니다.
+>
+> **초기 상품 데이터:**
+> | productId | 상품명 | 초기 재고 |
+> |-----------|--------|----------|
+> | P001 | 떡볶이 세트 | 10개 |
+> | P002 | 순대국밥 | 1개 (동시성 테스트용) |
+> | P003 | 김밥 도시락 | 0개 (품절) |
+>
+> 재고가 바뀐 경우 `/v1/test/reset` 으로 초기 상태로 복원할 수 있습니다.
 
 ---
 
