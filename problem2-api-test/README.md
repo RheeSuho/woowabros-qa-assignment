@@ -52,13 +52,9 @@ Stub server running
 - 드롭다운에서 케이스 선택 → **실행** 버튼으로 API 검증
 - **전체 실행** 버튼으로 16개 케이스 일괄 실행
 
-> **Swagger UI로 API 직접 실행하기:**
-> ```bash
-> npx ts-node src/server/stub-server.ts
-> ```
-> 서버 실행 후 브라우저에서 **http://localhost:3000/api-docs** 접속
->
-> 각 엔드포인트의 `Try it out` → `Execute` 버튼으로 실제 요청을 보낼 수 있습니다.
+> **API 직접 실행하기:**
+> - **인터랙티브 테스트 러너**: **http://localhost:3000** — 드롭다운으로 케이스 선택 후 바로 실행
+> - **Swagger UI**: **http://localhost:3000/api-docs** — `Try it out` → `Execute`로 직접 요청
 >
 > **초기 상품 데이터:**
 > | productId | 상품명 | 초기 재고 |
