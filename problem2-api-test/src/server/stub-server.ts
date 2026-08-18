@@ -201,5 +201,19 @@ app.post('/v1/test/reset', (_req: Request, res: Response) => {
 
 // 단독 실행 시에만 서버 바인딩 (테스트에서 import 시 바인딩 안 함)
 if (require.main === module) {
-  app.listen(3000, () => console.log('Stub server running on http://localhost:3000'))
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const os = require('os')
+  const PORT = 3000
+
+  app.listen(PORT, '0.0.0.0', () => {
+    const nets = os.networkInterfaces() as Record<string, Array<{ family: string; address: string; internal: boolean }>>
+    const localIp = Object.values(nets)
+      .flat()
+      .find((n) => n.family === 'IPv4' && !n.internal)?.address ?? 'unknown'
+
+    console.log(`\nStub server running`)
+    console.log(`  Local   : http://localhost:${PORT}`)
+    console.log(`  Network : http://${localIp}:${PORT}`)
+    console.log(`  Test UI : http://${localIp}:${PORT}/\n`)
+  })
 }

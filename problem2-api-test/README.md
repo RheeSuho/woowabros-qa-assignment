@@ -21,13 +21,35 @@ npm test
  RUN  v1.6.1
 
  ✓ src/tests/stock.test.ts        (3 tests)
- ✓ src/tests/orders.test.ts      (10 tests)
+ ✓ src/tests/orders.test.ts      (12 tests)
  ✓ src/tests/concurrency.test.ts  (1 test)
 
  Test Files  3 passed (3)
-      Tests  14 passed (14)
+      Tests  16 passed (16)
    Duration  ~1s
 ```
+
+### 인터랙티브 테스트 러너 (브라우저 UI)
+
+API를 브라우저에서 직접 실행해볼 수 있는 테스트 러너를 제공합니다.
+
+```bash
+npx ts-node src/server/stub-server.ts
+```
+
+서버 시작 시 로컬 및 네트워크 주소가 출력됩니다:
+
+```
+Stub server running
+  Local   : http://localhost:3000
+  Network : http://192.168.x.x:3000
+  Test UI : http://192.168.x.x:3000/
+```
+
+- **같은 PC**: `http://localhost:3000` 접속
+- **같은 네트워크의 다른 기기**: 출력된 Network 주소로 접속
+- 드롭다운에서 케이스 선택 → **실행** 버튼으로 API 검증
+- **전체 실행** 버튼으로 16개 케이스 일괄 실행
 
 > **Swagger UI로 API 직접 실행하기:**
 > ```bash
