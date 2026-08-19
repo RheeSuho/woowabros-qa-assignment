@@ -1,7 +1,8 @@
 # 문제1: 테스트 자동화 전략 설계
 
 ## 시나리오 요약
-배달의민족 앱에 "실시간 주문 현황" 화면 추가. 개발자 2명, 2주 후 오픈, 기존 자동화 없음.
+배달의민족 앱에 "실시간 주문 현황" 화면 추가.  
+개발자 2명, Android/iOS 동시 개발, 2주 후 오픈, 기존 자동화 없음.
 
 ---
 
@@ -40,7 +41,12 @@ UI / API / E2E 3개 레이어로 설계합니다.
      /--------------\
 ```
 
-#### API 통합 (70%) — 1주차 구축
+> **전제:** QA 커버리지(무엇을 테스트하는가)는 Android/iOS 양 플랫폼 모두 오픈 전에 확보합니다.
+> 자동화 커버리지(어디부터 코드로 실행하는가)는 ROI 순으로 우선순위를 정합니다.
+
+---
+
+#### API 통합 (70%) — 1주차 자동화 구축, 양 플랫폼 공통
 
 | 항목 | 판단 이유 |
 |------|-----------|
@@ -48,28 +54,100 @@ UI / API / E2E 3개 레이어로 설계합니다.
 | 상태 전환 흐름 (접수 대기 → 조리 중 → 배달 중 → 완료) | 회귀 시 조기 감지 가능 |
 | 동시 요청 처리 및 에러 응답 (400/404/500) | 피크 타임 안정성 직결 |
 
-UI 변경에 무관하게 안정적으로 동작하고 실행 속도가 빨라 손익분기점이 가장 짧습니다.
+API는 플랫폼(Android/iOS)에 무관한 서버 로직을 검증합니다. 한 번 구현하면 양 플랫폼 모두 커버하고, 실행 속도가 빠르며 UI 변경에 영향받지 않아 손익분기점이 가장 짧습니다.
 
-#### UI (20%) — 오픈 후 화면 확정 시점에 추가
+---
+
+#### UI (20%) — 오픈 후 양 플랫폼 추가
 
 | 항목 | 검증 내용 |
 |------|-----------|
 | 화면 상태별 렌더링 | 로딩 스피너, 에러 화면, 빈 화면이 각 상황에 맞게 표시되는지 |
-| 주문 상태별 UI | "접수 대기" / "조리 중" / "배달 중"의 텍스트·아이콘·색상이 정확한지 |
-| 백그라운드 복귀 후 상태 갱신 | `device.pressHome()` 후 복귀 시 최신 상태로 갱신되는지 |
+| 주문 상태별 UI | 텍스트·아이콘·색상이 상태별로 정확하게 표시되는지 |
+| 백그라운드 복귀 후 상태 갱신 | 앱 복귀 시 최신 주문 상태로 갱신되는지 |
 
-Espresso + ActivityScenario(ViewModel Mock)로 구현. 화면 단위로 격리해 실행하므로 E2E보다 빠르고 안정적입니다.
+- Android: Espresso + ActivityScenario (ViewModel Mock)
+- iOS: XCUITest + 의존성 주입
 
-**오픈 전 UI 품질은 어떻게 보완하나:**
-오픈 전 2주 동안은 Android E2E Happy Path가 화면 렌더링까지 포함해 커버하고, iOS는 수동 테스트로 동일 범위를 병행 검증합니다. 탐색적 테스트(ET)로 명세 외 케이스를 보완합니다. UI 자동화는 오픈 후 화면이 확정된 시점에 추가해 릴리즈마다 자동으로 회귀 커버리지를 확보하는 구조로 발전시킵니다.
+**오픈 전 UI 커버리지는 어떻게 확보하나:**
+오픈 전에는 E2E Happy Path가 핵심 화면 렌더링을 포함해 Android/iOS 양 플랫폼 모두 자동으로 검증합니다. UI 자동화(컴포넌트 단위 상태 검증)는 화면이 확정된 오픈 후 양 플랫폼 동시에 구축해, 이후 릴리즈부터 자동 회귀 커버리지를 확보합니다.
 
-#### E2E (10%) — 2주차 구축, Android 우선
+---
 
-| 항목 | 판단 이유 |
-|------|-----------|
-| Happy Path: 앱 실행 → 주문 현황 진입 → 상태 확인 (Android) | 릴리즈마다 반복 검증 필요 |
+#### E2E (10%) — 2주차 자동화 구축, 양 플랫폼 동시
 
-수동 테스트는 Android/iOS 두 플랫폼을 오픈 전에 동시 대응합니다. E2E 자동화는 Android(UIAutomator/Espresso)를 먼저 구축해 패턴을 확립한 뒤 iOS(XCUITest)로 확장하는 순서로 진행합니다.
+검증 범위: `앱 실행 → 주문 현황 화면 진입 → 상태 텍스트 "접수 대기" 확인`
+
+**공통 설계 원칙: Page Object Model**
+
+테스트 시나리오(무엇을 검증하는가)는 플랫폼에 관계없이 동일합니다. 플랫폼별로 달라지는 것은 화면 요소를 찾는 방법(locator)과 도구뿐입니다. 각 화면을 Page Object 클래스로 분리해 시나리오 코드는 플랫폼 구현과 독립적으로 유지합니다.
+
+---
+
+**Android — UIAutomator + Kotlin**
+
+```kotlin
+// Page Object: 각 화면을 클래스로 분리
+class OrderStatusPage(private val device: UiDevice) {
+    fun assertStatus(expected: String) {
+        val status = device.wait(Until.findObject(
+            By.res("com.baemin.android", "tv_order_status")), 15_000L)
+            ?: error("주문 상태 텍스트를 찾을 수 없음")
+        assertEquals(expected, status.text)
+    }
+}
+
+// 테스트 시나리오
+@Test
+fun happyPath_주문현황_접수대기_확인() {
+    StoreListPage(device)
+        .selectStore(TestData.STORE_NAME)   // → StoreMenuPage
+        .selectMenu(TestData.MENU_NAME)
+        .tapOrder()                          // → OrderConfirmPage
+        .completePayment()                   // → OrderStatusPage
+        .assertStatus("접수 대기")
+}
+```
+
+- locator: Resource ID 기반 (`By.res(...)`) — 텍스트 변경에 영향받지 않음
+- 대기: `Until.findObject(timeout)` 조건부 대기 — `Thread.sleep` 미사용
+- 실행: `./gradlew connectedAndroidTest`
+
+---
+
+**iOS — XCUITest + Swift**
+
+```swift
+// Page Object: Android와 동일한 화면 구조, 플랫폼 구현만 다름
+class OrderStatusPage {
+    let app: XCUIApplication
+    func assertStatus(_ expected: String) {
+        let status = app.staticTexts["order_status_label"]
+        XCTAssertTrue(status.waitForExistence(timeout: 15))
+        XCTAssertEqual(status.label, expected)
+    }
+}
+
+// 테스트 시나리오 (Android와 동일한 흐름)
+func testHappyPath_주문현황_접수대기() {
+    StoreListPage(app: app)
+        .selectStore(TestData.storeName)
+        .selectMenu(TestData.menuName)
+        .tapOrder()
+        .completePayment()
+        .assertStatus("접수 대기")
+}
+```
+
+- locator: Accessibility Identifier (`"order_status_label"`) — 개발팀과 사전 협의해 부여
+- 대기: `waitForExistence(timeout:)` 조건부 대기
+- 실행: Xcode → `⌘U` 또는 `xcodebuild test`
+
+---
+
+**2주차 병렬 작업 방식**
+
+QA 엔지니어 1명이 두 플랫폼을 순차로 구축하기엔 2주가 촉박합니다. Android 담당·iOS 담당이 각자 동일한 Happy Path 시나리오를 기준으로 병렬 작업하고, 공통 TestData(가게명, 메뉴명, 기대 상태값)를 문서로 공유해 시나리오가 일치하도록 맞춥니다.
 
 ---
 
@@ -87,9 +165,13 @@ Espresso + ActivityScenario(ViewModel Mock)로 구현. 화면 단위로 격리�
 ### 단계별 구축 로드맵
 
 ```
-1주차: API 통합 테스트 구현 + CI 연동
-2주차: E2E Happy Path 1개 (Android) 구현 + 오픈 전 ET 병행
-오픈 후: UI 레이어 구축 → iOS E2E 확장
+1주차: API 통합 테스트 구현 완료 + CI 연동
+       (양 플랫폼 공통 커버)
+
+2주차: E2E Happy Path 자동화 — Android/iOS 병렬 구축
+       + 탐색적 테스트(ET) 병행
+
+오픈 후: UI 레이어 자동화 (Android/iOS 양 플랫폼)
 ```
 
 ---
@@ -117,14 +199,15 @@ main 브랜치 머지
     │
     ▼
 [Stage 3] 릴리즈 전 (pre-release)
-    └── 전체 회귀 + UI 테스트 + E2E 확장
+    ├── 전체 회귀 + E2E (Android + iOS)
+    └── UI 테스트 (오픈 후 추가)
          → 실패 시 릴리즈 블로킹
 ```
 
 **설계 의도:**
 - Stage 1은 속도 우선 — API만 실행해 개발자 피드백 루프 최소화
 - E2E는 pre-merge 블로킹에서 제외 — 실행 시간(수 분)이 개발 흐름을 저해하지 않도록
-- UI 테스트는 화면 안정화 이후인 Stage 3부터 포함해 Flaky 없이 운영
+- iOS E2E는 안정화 후 Stage 3에 편입
 
 ---
 
@@ -146,7 +229,7 @@ main 브랜치 머지
 
 ```
 1. 실패 증거 수집
-   └── 스크린샷, logcat, 네트워크 타임라인 자동 저장 (CI artifact)
+   └── 스크린샷, logcat(Android)/Console(iOS), 네트워크 타임라인 자동 저장
 
 2. 재현율 측정
    └── 동일 케이스 10회 연속 실행
