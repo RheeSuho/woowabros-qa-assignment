@@ -69,7 +69,7 @@ Espresso + ActivityScenario(ViewModel Mock)로 구현. 화면 단위로 격리�
 |------|-----------|
 | Happy Path: 앱 실행 → 주문 현황 진입 → 상태 확인 (Android) | 릴리즈마다 반복 검증 필요 |
 
-Android 안정화 후 iOS(XCUITest)로 확장합니다. 두 플랫폼을 동시에 구축하기보다 Android에서 패턴을 확립한 뒤 iOS에 적용하면 품질과 속도 모두 확보할 수 있습니다.
+수동 테스트는 Android/iOS 두 플랫폼을 오픈 전에 동시 대응합니다. E2E 자동화는 Android(UIAutomator/Espresso)를 먼저 구축해 패턴을 확립한 뒤 iOS(XCUITest)로 확장하는 순서로 진행합니다.
 
 ---
 
