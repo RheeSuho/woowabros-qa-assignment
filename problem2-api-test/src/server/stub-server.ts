@@ -205,7 +205,7 @@ if (require.main === module) {
   const os = require('os')
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const localtunnel = require('localtunnel')
-  const PORT = 3000
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000
 
   app.listen(PORT, '0.0.0.0', async () => {
     const nets = os.networkInterfaces() as Record<string, Array<{ family: string; address: string; internal: boolean }>>

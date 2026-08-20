@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: bmart-stock-api
+    runtime: node
+    rootDir: problem2-api-test
+    buildCommand: npm install
+    startCommand: npm start

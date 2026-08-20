@@ -4,6 +4,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "start": "ts-node src/server/stub-server.ts",
     "start:stub": "ts-node src/server/stub-server.ts"
   },
   "dependencies": {
