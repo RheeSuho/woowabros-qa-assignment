@@ -53,7 +53,7 @@ Stub server running
 - **전체 실행** 버튼으로 16개 케이스 일괄 실행
 
 > **API 직접 실행하기:**
-> - **인터랙티브 테스트 러너**: **http://localhost:3000** — 드롭다운으로 케이스 선택 후 바로 실행
+> - **인터랙티브 테스트 러너**: **https://woowabros-qa-assignment-1.onrender.com/** — 해당 링크에서 바로 검증하실 수 있습니다
 >
 > **초기 상품 데이터:**
 > | productId | 상품명 | 초기 재고 |
