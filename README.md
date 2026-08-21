@@ -1,4 +1,4 @@
-# 우아한형제들 Senior QA Engineer 사전과제
+# 우아한형제들 QA Engineer 사전과제
 
 ## 목차
 
