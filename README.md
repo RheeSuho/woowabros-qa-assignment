@@ -28,7 +28,7 @@
 - 실제 서버 없이 인메모리 스텁 서버(Express)를 직접 구현해 실행 가능한 상태로 제출
 - Mutex 패턴으로 동시 주문 시 재고 초과 차감을 방지하는 원자적 처리 구현
 - `fixture / helper / test` 3계층으로 분리해 테스트 데이터와 검증 로직을 재사용 가능하게 설계
-- 브라우저 UI(http://localhost:3000)에서 16개 TC를 직접 실행해볼 수 있도록 인터랙티브 테스트 러너 제공
+- 브라우저 UI(https://woowabros-qa-assignment-1.onrender.com/)에서 TC를 직접 실행해볼 수 있도록 인터랙티브 테스트 러너 제공
 
 **실행 방법 요약**
 ```bash
