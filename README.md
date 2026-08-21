@@ -79,7 +79,7 @@ npm run generate
 
 ## AI 도구 활용 내역
 
-본 과제는 [Claude Code](https://claude.ai/code) (Anthropic)를 활용해 작성했습니다.
+본 과제는 [Claude Code](https://claude.ai/code) 를 활용해 작성했습니다.
 
 | 항목 | 활용 방식 |
 |------|----------|
