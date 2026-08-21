@@ -114,7 +114,7 @@ JSON: { api, total, test_cases: [{ id, category, title, request, expected_status
 npm run generate
 
 # Mock 모드 (API 키 없이 결과 확인)
-npm run generate -- --mock
+npm run generate:mock
 ```
 
 ### 실행 결과 예시

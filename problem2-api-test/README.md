@@ -248,10 +248,10 @@ A가 락을 보유한 상태에서 B가 도달해야 두 요청이 실제로 겹
 | TC-07 | 주문 생성 | 존재하지 않는 상품 주문 | 404 PRODUCT_NOT_FOUND |
 | TC-08 | 주문 생성 | quantity=0 | 400 INVALID_QUANTITY |
 | TC-09 | 주문 생성 | 수량 > 재고 | 409 INSUFFICIENT_STOCK |
-| TC-15 | 주문 생성 | quantity 음수(-1) | 400 INVALID_QUANTITY |
-| TC-16 | 주문 생성 | quantity 소수점(1.5) | 400 INVALID_QUANTITY |
 | TC-10 | 주문 취소 | 정상 취소 → 재고 복구 | 200, stock 원복 |
 | TC-11 | 주문 취소 | 존재하지 않는 주문 취소 | 404 ORDER_NOT_FOUND |
 | TC-12 | 주문 취소 | 이미 취소된 주문 재취소 | 409 ALREADY_CANCELLED |
 | TC-13 | 복구 플로우 | 취소 후 다른 고객 즉시 재주문 성공 | 재주문 201 |
 | TC-14 | **동시성** | 재고 1개 + 수십ms 간격 2요청 | 1건 201, 1건 409 |
+| TC-15 | 주문 생성 | quantity 음수(-1) | 400 INVALID_QUANTITY |
+| TC-16 | 주문 생성 | quantity 소수점(1.5) | 400 INVALID_QUANTITY |
