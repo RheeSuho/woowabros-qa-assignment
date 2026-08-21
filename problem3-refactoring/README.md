@@ -139,6 +139,8 @@ fun `정상_주문_플로우_결제_완료_후_접수_대기_상태_확인`() {
         .waitUntilLoaded()
         .completePayment()                        // → PaymentPage
         .waitUntilLoaded()
+        .confirmPayment()                         // → OrderStatusPage
+        .waitUntilLoaded()
         .assertStatus(OrderStatus.WAITING_FOR_ACCEPTANCE)
         .assertOrderNumberVisible()
 }

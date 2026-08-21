@@ -68,12 +68,14 @@ class OrderFlowTest {
     fun `정상_주문_플로우_결제_완료_후_접수_대기_상태_확인`() {
         storeListPage
             .waitUntilLoaded()
-            .selectStore(TestData.STORE_NAME)
+            .selectStore(TestData.STORE_NAME)   // → StoreMenuPage
             .waitUntilLoaded()
             .selectMenu(TestData.MENU_NAME)
-            .tapOrderButton()
+            .tapOrderButton()                    // → OrderConfirmPage
             .waitUntilLoaded()
-            .completePayment()
+            .completePayment()                   // → PaymentPage
+            .waitUntilLoaded()
+            .confirmPayment()                    // → OrderStatusPage
             .waitUntilLoaded()
             .assertStatus(OrderStatus.WAITING_FOR_ACCEPTANCE)
             .assertOrderNumberVisible()
