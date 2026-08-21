@@ -64,13 +64,15 @@
 **실행 방법 요약**
 ```bash
 cd problem4-ai-tools && npm install
-cp .env.example .env  # ANTHROPIC_API_KEY 입력
-npm run classify      # 실패 로그 분류기 실행
-npm run generate      # TC 생성기 실행
 
-# API 키 없이 결과 확인 (Mock 모드)
-npm run classify -- --mock
-npm run generate -- --mock
+# API 키 없이 바로 실행 (Mock 모드)
+npm run classify:mock
+npm run generate:mock
+
+# 실제 AI 호출 시 (API 키 필요)
+cp .env.example .env  # ANTHROPIC_API_KEY 입력
+npm run classify
+npm run generate
 ```
 
 ---

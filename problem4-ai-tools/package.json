@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "classify": "ts-node src/failure-classifier/classifier.ts",
-    "generate": "ts-node src/tc-generator/generator.ts"
+    "generate": "ts-node src/tc-generator/generator.ts",
+    "classify:mock": "ts-node src/failure-classifier/classifier.ts --mock",
+    "generate:mock": "ts-node src/tc-generator/generator.ts --mock"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

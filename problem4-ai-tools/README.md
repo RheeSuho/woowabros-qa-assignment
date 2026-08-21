@@ -36,15 +36,14 @@ JSON: { classification, confidence, summary, root_cause, recommended_action }
 # 의존성 설치
 npm install
 
-# API 키 설정 (.env.example 참고)
-cp .env.example .env
-# ANTHROPIC_API_KEY=sk-ant-... 입력
+# API 키 없이 바로 실행 (Mock 모드)
+npm run classify:mock
+npm run generate:mock
 
-# 실제 API 호출
+# 실제 API 호출 시 (API 키 필요)
+cp .env.example .env  # ANTHROPIC_API_KEY 입력
 npm run classify
-
-# Mock 모드 (API 키 없이 결과 확인)
-npm run classify -- --mock
+npm run generate
 ```
 
 ### 실행 결과 예시
