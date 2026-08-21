@@ -9,6 +9,7 @@ import com.baemin.e2e.pages.StoreListPage
 import com.baemin.e2e.rules.ScreenshotOnFailureRule
 import com.baemin.e2e.support.OrderStatus
 import com.baemin.e2e.support.TestData
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,6 +54,16 @@ class OrderFlowTest {
      * - assertion이 상태 텍스트 내용까지 검증
      * - 실패 시 어느 단계에서 어떤 요소를 못 찾았는지 메시지로 즉시 파악 가능
      */
+    /**
+     * 테스트 종료 후 홈 화면으로 복귀.
+     * 완료된 주문이 앱에 남아있어도 다음 테스트는 @Before에서 앱을 재시작하므로
+     * 화면 상태 오염은 방지됨. 주문 데이터 자체는 서버에 남지만 이 테스트 범위 밖.
+     */
+    @After
+    fun tearDown() {
+        device.pressHome()
+    }
+
     @Test
     fun `정상_주문_플로우_결제_완료_후_접수_대기_상태_확인`() {
         storeListPage
