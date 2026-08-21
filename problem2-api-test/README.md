@@ -33,27 +33,18 @@ npm test
 
 API를 브라우저에서 직접 실행해볼 수 있는 테스트 러너를 제공합니다.
 
+> **바로 접속하기 (설치 불필요):** **https://woowabros-qa-assignment-1.onrender.com/**
+
+로컬에서 직접 실행할 경우:
+
 ```bash
-npx ts-node src/server/stub-server.ts
+npm start
 ```
 
-서버 시작 시 로컬, 네트워크, 외부 공개 주소가 모두 출력됩니다:
+서버 시작 후 `http://localhost:3000` 접속
 
-```
-Stub server running
-  Local   : http://localhost:3000
-  Network : http://192.168.x.x:3000
-  Public  : https://xxxx.loca.lt  ← 외부 접속용 (인터넷 어디서나)
-```
-
-- **같은 PC**: `http://localhost:3000` 접속
-- **같은 네트워크의 다른 기기**: 출력된 Network 주소로 접속
-- **외부 네트워크 (다른 와이파이 등)**: 출력된 Public 주소로 접속 — 별도 설정 불필요
 - 드롭다운에서 케이스 선택 → **실행** 버튼으로 API 검증
 - **전체 실행** 버튼으로 16개 케이스 일괄 실행
-
-> **API 직접 실행하기:**
-> - **인터랙티브 테스트 러너**: **https://woowabros-qa-assignment-1.onrender.com/** — 해당 링크에서 바로 검증하실 수 있습니다
 >
 > **초기 상품 데이터:**
 > | productId | 상품명 | 초기 재고 |
